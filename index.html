@@ -4,163 +4,38 @@
 		<title>Nijigasaki Monthly Rankings</title>
 		<meta property="og:title" content="Nijigasaki Monthly Rankings"/>
 		<meta property="og:type" content="website"/>
-		<meta property="og:image" content="niji_rankings2019-01.jpg"/>
+		<meta property="og:image" content="https://stormseeker39.github.io/nijigasaki-monthly-rankings/niji_rankings_2019-01.png"/>
 
-		<script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" crossorigin="anonymous"/>
 		
-		<style>
-			body {
-				margin: 0;
-				text-align: center;
-				background-color: #36393F;
-				font-size: 11pt;
-				font-family: 'Arial', 'Calibri', 'sans-serif';
-				color: whitesmoke;
-			}
-			
+		<script type="text/javascript" src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+		<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" crossorigin="anonymous"></script>
+		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" crossorigin="anonymous"></script>
+		<script src="js/plot_ranks.js?v=201901"></script>
+		
+		<style type="text/css">
 			#div_plotarea {
 				display: inline-block;
-				border: 3px solid whitesmoke;
 			}
 		</style>
 	</head>
-	<body>
-		<div id="div_plotarea"></div>
-		<div>
-			<p>Click a member's name to toggle visibility of their graph.</p>
-			<p>Double-click a member's name to only show that member's graph.</p>
+	<body class="bg-dark text-light">
+		<header style="height: 60px"></header>
+		<div class="container-fluid pb-2">
+			<div class="row justify-content-center">
+				<div class="col-9" style="text-align: center">
+					<div id="div_plotarea"></div>
+					<div id="div_plotarea_hidden" hidden=""></div>
+				</div>
+			</div>
+			<div class="row justify-content-center">
+				<div class="col-9">
+					<h4>Official Results Pages</h4>
+					<div id="div_result_links"></div>
+				</div>
+			</div>
+			<footer style="height: 60px"></footer>
 		</div>
-		<script type="text/javascript">
-			var names = ['Ayumu','Kasumi','Shizuku','Karin','Ai','Kanata','Setsuna','Emma','Rina'];
-			
-			var colors = ['#ffb6c1','#ffff93','#add8e6','#4169e1','#ff7c00','#e2a9f3','#ff0000','#90ee90','#ffffff'];
-			//var colors = ['#ED7D95','#E7D600','#01B7ED','#485EC6','#FF5800','#A664A0','#D81C2F','#84C36E','#9CA5B9'];
-			//var colors = ['#FFCDD8','#F6E94A','#93E6FF','#8CA0FF','#FF9C68','#D57ECD','#FF6070','#B8FF9F','#CDCDCD'];
-			
-			var ranks = [
-				[4,6,6,9,8,8,8,6,6,7,6,5,6,6,5,5,4,5,5],
-				[3,7,4,4,4,4,6,4,3,3,2,4,7,4,4,1,3,6,6],
-				[6,3,3,5,6,6,3,8,7,8,8,6,9,5,6,6,6,7,7],
-				[5,8,5,1,2,1,2,1,1,1,3,2,2,2,3,7,2,3,3],
-				[9,9,7,7,5,5,7,3,4,5,5,7,4,8,7,9,9,2,4],
-				[8,4,9,6,3,3,5,5,5,6,4,3,1,1,2,4,5,8,8],
-				[2,1,1,2,1,2,4,2,2,2,1,1,3,3,1,3,7,1,2],
-				[7,5,8,8,9,7,9,7,8,4,7,8,8,9,8,8,8,4,1],
-				[1,2,2,3,7,9,1,9,9,9,9,9,5,7,9,2,1,9,9]
-			];
-			
-			var plot_area = document.getElementById('div_plotarea');
-			
-			var months = [];
-			
-			for (var year = 2017; year <= 2019; year++) {
-				var i = (year == 2017 ? 7 : 1);
-				for (i; i <= 12; i++) {
-					var m = i <= 9 ? '0'.concat(i) : i;
-					months.push(year+"-"+m);
-				}
-			}
-			
-			var data = [];
-			for (var i = 0; i < 9; i++) {
-				var trace = {
-					x: months,
-					y: ranks[i],
-					mode: 'lines',
-					type: 'scatter',
-					name: names[i],
-					line: {
-						color: colors[i],
-						width: 3
-					}
-				};
-				data.push(trace);
-			}
-			
-			function download_image(gd) {
-				Plotly.relayout(gd,{'xaxis.rangeslider.visible':false,'xaxis.rangeselector.visible':false,'legend.y':-0.1});
-				Plotly.downloadImage(gd, {format: 'jpeg', filename: 'niji_rankings'+months[ranks[0].length-1]});
-				Plotly.relayout(gd,{'xaxis.rangeslider.visible':true,'xaxis.rangeselector.visible':true,'legend.y':-0.35});
-			}
-			
-			var layout = {
-				title: {
-					text: 'Nijigasaki Monthly Rankings',
-					font: {
-						size: 24
-					}
-				},
-				xaxis: {
-					type: 'date',
-					dtick: 'M1',
-					rangeslider: {
-						visible: true,
-						thickness: 0.1
-					},
-					rangeselector: {
-						buttons: [
-							//{
-							//	count: 1,
-							//	step: 'year',
-							//	stepmode: 'todate',
-							//	label: 'Current Year'
-							//},
-							{
-								count: 6,
-								step: 'month',
-								stepmode: 'backward',
-								label: 'Last 6 months'
-							},
-							{step: 'all'}
-						],
-						bgcolor: '#999'
-					}
-				},
-				yaxis: {
-					title: 'Rank',
-					nticks: 9,
-					range: [1,9],
-					autorange: 'reversed',
-					fixranged: true,
-					showgrid: true,
-					gridcolor: '#505358'
-				},
-				height: 600,
-				width: (ranks[0].length +  4) * 60,
-				margin: {
-					pad: 5,
-					b: 40
-				},
-				font: {
-					color: '#fff',
-					size: 14,
-					family: 'Calibri, Arial, sans-serif'
-				},
-				showlegend: true,
-				legend: {
-					orientation: 'h',
-					x: 0.05,
-					y: -0.35
-				},
-				dragmode: 'pan',
-				paper_bgcolor: '#36393F',
-				plot_bgcolor: '#36393F'
-			};
-			
-			var plotoptions = {
-				displaylogo: false,
-				modeBarButtonsToAdd: [
-					{
-						name: 'customimg',
-						title: 'Download as Image',
-						icon: Plotly.Icons.camera,
-						click: download_image
-					}
-				],
-				modeBarButtonsToRemove: ['zoom2d','zoomIn2d','zoomOut2d','toImage']
-			};
-			
-			Plotly.plot(plot_area, data, layout, plotoptions);
-		</script>
 	</body>
 </html>
