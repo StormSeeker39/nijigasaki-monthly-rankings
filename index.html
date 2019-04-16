@@ -5,7 +5,7 @@
 		<meta property="og:title" content="Nijigasaki Monthly Rankings"/>
 		<meta property="og:type" content="website"/>
 		<meta property="og:url" content="https://stormseeker39.github.io/nijigasaki-monthly-rankings/"/>
-		<meta property="og:image" content="https://stormseeker39.github.io/nijigasaki-monthly-rankings/niji_rankings_2019-02.png"/>
+		<meta property="og:image" content="https://stormseeker39.github.io/nijigasaki-monthly-rankings/niji_rankings_2019-03.png"/>
 		<meta property="og:site_name" content="Nijigasaki Monthly Rankings"/>
 
 		<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" crossorigin="anonymous"/>
@@ -14,11 +14,15 @@
 		<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" crossorigin="anonymous"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" crossorigin="anonymous"></script>
 		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" crossorigin="anonymous"></script>
-		<script src="js/plot_ranks.js?v=201902"></script>
+		<script src="js/plot_ranks.js?v=201903"></script>
 		
 		<style type="text/css">
 			#div_plotarea {
 				display: inline-block;
+			}
+			
+			.div_plotarea {
+				text-align: center;
 			}
 		</style>
 	</head>
@@ -31,10 +35,20 @@
 					<div id="div_plotarea_hidden" hidden=""></div>
 				</div>
 			</div>
-			<div class="row justify-content-center">
+			<div class="row justify-content-center mb-3">
 				<div class="col-9">
 					<h4>Official Results Pages</h4>
 					<div id="div_result_links"></div>
+				</div>
+			</div>
+			<div class="row justify-content-center"></div>
+			<div class="row justify-content-center" hidden>
+				<div class="col-9">
+					<h4>Yearly Cumulative Average</h4>
+					<div id="carousel-moving-avg" class="carousel slide">
+						<ol class="carousel-indicators"></ol>
+						<div class="carousel-inner"></div>
+					</div>
 				</div>
 			</div>
 			<footer style="height: 60px"></footer>

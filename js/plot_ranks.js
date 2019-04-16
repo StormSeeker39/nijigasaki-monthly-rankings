@@ -3,18 +3,42 @@ var names = ['Ayumu','Kasumi','Shizuku','Karin','Ai','Kanata','Setsuna','Emma','
 var colors = ['#ffb6c1','#ffff93','#add8e6','#4169e1','#ff7c00','#e2a9f3','#ff0000','#90ee90','#ffffff'];
 //var colors = ['#ED7D95','#E7D600','#01B7ED','#485EC6','#FF5800','#A664A0','#D81C2F','#84C36E','#9CA5B9'];
 //var colors = ['#FFCDD8','#F6E94A','#93E6FF','#8CA0FF','#FF9C68','#D57ECD','#FF6070','#B8FF9F','#CDCDCD'];
-			
+
+var years = [2017,2018,2019];
+
 var ranks = [
-	[4,6,6,9,8,8,8,6,6,7,6,5,6,6,5,5,4,5,5,1],
-	[3,7,4,4,4,4,6,4,3,3,2,4,7,4,4,1,3,6,6,7],
-	[6,3,3,5,6,6,3,8,7,8,8,6,9,5,6,6,6,7,7,6],
-	[5,8,5,1,2,1,2,1,1,1,3,2,2,2,3,7,2,3,3,3],
-	[9,9,7,7,5,5,7,3,4,5,5,7,4,8,7,9,9,2,4,4],
-	[8,4,9,6,3,3,5,5,5,6,4,3,1,1,2,4,5,8,8,9],
-	[2,1,1,2,1,2,4,2,2,2,1,1,3,3,1,3,7,1,2,2],
-	[7,5,8,8,9,7,9,7,8,4,7,8,8,9,8,8,8,4,1,5],
-	[1,2,2,3,7,9,1,9,9,9,9,9,5,7,9,2,1,9,9,8]
+	[4,6,6,9,8,8,8,6,6,7,6,5,6,6,5,5,4,5,5,1,5],
+	[3,7,4,4,4,4,6,4,3,3,2,4,7,4,4,1,3,6,6,7,6],
+	[6,3,3,5,6,6,3,8,7,8,8,6,9,5,6,6,6,7,7,6,1],
+	[5,8,5,1,2,1,2,1,1,1,3,2,2,2,3,7,2,3,3,3,3],
+	[9,9,7,7,5,5,7,3,4,5,5,7,4,8,7,9,9,2,4,4,4],
+	[8,4,9,6,3,3,5,5,5,6,4,3,1,1,2,4,5,8,8,9,8],
+	[2,1,1,2,1,2,4,2,2,2,1,1,3,3,1,3,7,1,2,2,2],
+	[7,5,8,8,9,7,9,7,8,4,7,8,8,9,8,8,8,4,1,5,7],
+	[1,2,2,3,7,9,1,9,9,9,9,9,5,7,9,2,1,9,9,8,9]
 ];
+
+var moving_average = [];
+
+for (var memberidx = 0; memberidx < 9; memberidx++) {
+	moving_average.push({});
+	var x0 = 0;
+	for (var year = 2017; year <= 2019; year++) {
+		moving_average[memberidx][year] = Array();
+		var sum = 0;
+		var count = 0;
+		var i = (year == 2017 ? 7 : 1);
+		for (i; i <= 12; i++) {
+			if (x0 == ranks[memberidx].length) {
+				break;
+			}
+			sum += ranks[memberidx][x0];
+			count++;
+			x0++;
+			moving_average[memberidx][year].push(sum/count);
+		}
+	}
+}
 
 var month_names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
@@ -184,9 +208,82 @@ function generate_links() {
 	}
 }
 
+function draw_moving_avg() {
+	var baselayout = {
+		xaxis: {
+			type: 'date',
+			dtick: 'M1',
+			hoverformat: '%b %Y'
+		},
+		yaxis: {
+			title: 'Rank',
+			nticks: 9,
+			range: [1,9],
+			autorange: 'reversed',
+			fixranged: true,
+			showgrid: true,
+			gridcolor: '#505358'
+		},
+		width: 1024,
+		margin: {
+			pad: 5,
+			b: 100
+		},
+		font: {
+			color: '#dcddde',
+			size: 14,
+			family: 'Calibri, Arial, sans-serif'
+		},
+		showlegend: true,
+		dragmode: 'pan',
+		paper_bgcolor: $(':root').css('--dark'),
+		plot_bgcolor: $(':root').css('--dark')
+	};
+	
+	for (var i in years) {
+		var data = [];
+		var year = years[i];
+		var avg_months = months.filter( (val, idx, arr) => {return new Date(val).getFullYear() == year;} );
+		for (var memberidx in moving_average) {
+			var trace = {
+				x: avg_months,
+				y: moving_average[memberidx][year],
+				mode: 'lines',
+				type: 'scatter',
+				name: names[memberidx],
+				line: {
+					color: colors[memberidx],
+					width: 3
+				}
+			};
+			data.push(trace);
+		}
+		
+		var plot_area = $('<div>',{class:'div_plotarea carousel-item'});
+		var tab = $('<li>',{'data-target':'#carousel-moving-avg','data-slide-to':i,html:year});
+		if (i == years.length - 1) {
+			$(plot_area).addClass('active');
+			$(tab).addClass('active');
+		}
+		$('#carousel-moving-avg .carousel-inner').append(plot_area);
+		$('#carousel-moving-avg .carousel-indicators').append(tab);
+		
+		var layout = $.extend({},baselayout);
+		layout.title = {
+			text: year,
+			font: { size: 24 }
+		};
+		layout.xaxis.range = [avg_months[0],avg_months[avg_months.length-1]];
+		
+		Plotly.newPlot(plot_area.get(0), data, layout);
+	}
+	
+	
+}
+
 $(document).ready(function(){
 	
 	draw_plot();
 	generate_links();
-	
+	//draw_moving_avg();
 });
