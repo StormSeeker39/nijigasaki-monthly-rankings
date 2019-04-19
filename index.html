@@ -2,6 +2,11 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 	<head>
 		<title>Nijigasaki Monthly Rankings</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<meta http-equiv="Pragma" content="no-cache" />
+		<meta http-equiv="Expires" content="-1" />
+		<meta http-equiv="Cache-Control" content="no-cache" />
+		
 		<meta property="og:title" content="Nijigasaki Monthly Rankings"/>
 		<meta property="og:type" content="website"/>
 		<meta property="og:url" content="https://stormseeker39.github.io/nijigasaki-monthly-rankings/"/>
@@ -17,17 +22,15 @@
 		<script src="js/plot_ranks.js?v=201903"></script>
 		
 		<style type="text/css">
-			#div_plotarea {
-				display: inline-block;
-			}
+			
 		</style>
 	</head>
 	<body class="bg-dark text-light">
 		<header style="height: 60px"></header>
 		<div class="container-fluid pb-2">
 			<div class="row justify-content-center mb-5">
-				<div class="col-9" style="text-align: center">
-					<div id="div_plotarea"></div>
+				<div class="col-9 text-center">
+					<div id="div_plotarea" class="d-inline-block"></div>
 					<div id="div_plotarea_hidden" hidden=""></div>
 				</div>
 			</div>
@@ -38,10 +41,10 @@
 				</div>
 			</div>
 			<div class="row justify-content-center mb-5">
-				<div class="col-9" style="text-align: center">
-					<h4 style="text-align: left">Yearly Cumulative Average</h4>
-					<div id="carousel-moving-avg" class="carousel slide" style="display: inline-block">
-						<div class="carousel-inner"></div>
+				<div class="col-9 text-center">
+					<h4 class="text-left">Yearly Cumulative Average</h4>
+					<div id="carousel-moving-avg" class="carousel slide d-inline-block">
+						<div class="carousel-inner" style="height: 600px"></div>
 						<ol class="carousel-indicators"></ol>
 					</div>
 				</div>

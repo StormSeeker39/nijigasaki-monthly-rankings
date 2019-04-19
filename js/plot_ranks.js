@@ -6,43 +6,11 @@ var colors = ['#ffb6c1','#ffff93','#add8e6','#4169e1','#ff7c00','#e2a9f3','#ff00
 
 var years = [2017,2018,2019];
 
-var ranks = [
-	[4,6,6,9,8,8,8,6,6,7,6,5,6,6,5,5,4,5,5,1,5],
-	[3,7,4,4,4,4,6,4,3,3,2,4,7,4,4,1,3,6,6,7,6],
-	[6,3,3,5,6,6,3,8,7,8,8,6,9,5,6,6,6,7,7,6,1],
-	[5,8,5,1,2,1,2,1,1,1,3,2,2,2,3,7,2,3,3,3,3],
-	[9,9,7,7,5,5,7,3,4,5,5,7,4,8,7,9,9,2,4,4,4],
-	[8,4,9,6,3,3,5,5,5,6,4,3,1,1,2,4,5,8,8,9,8],
-	[2,1,1,2,1,2,4,2,2,2,1,1,3,3,1,3,7,1,2,2,2],
-	[7,5,8,8,9,7,9,7,8,4,7,8,8,9,8,8,8,4,1,5,7],
-	[1,2,2,3,7,9,1,9,9,9,9,9,5,7,9,2,1,9,9,8,9]
-];
-
-var moving_average = [];
-
-for (var memberidx = 0; memberidx < 9; memberidx++) {
-	moving_average.push({});
-	var x0 = 0;
-	for (var year = 2017; year <= 2019; year++) {
-		moving_average[memberidx][year] = Array();
-		var sum = 0;
-		var count = 0;
-		var i = (year == 2017 ? 7 : 1);
-		for (i; i <= 12; i++) {
-			if (x0 == ranks[memberidx].length) {
-				break;
-			}
-			sum += ranks[memberidx][x0];
-			count++;
-			x0++;
-			moving_average[memberidx][year].push(sum/count);
-		}
-	}
-}
-
 var month_names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 var months = [];
+
+var num_months = 0;
 
 for (var year = 2017; year <= 2019; year++) {
 	var i = (year == 2017 ? 7 : 1);
@@ -52,25 +20,55 @@ for (var year = 2017; year <= 2019; year++) {
 	}
 }
 
-var plot_width = (ranks[0].length +  4) * 60;
+var plot_width = 1024;
+
+function filter_unique(val, idx, arr) {
+	return arr.indexOf(val) == idx;
+}
+
+function unpack(rows, key) {
+  return rows.map(function(row) { return row[key]; });
+}
+
+function compute_yearly_average(row, idx, arr) {
+	var relevant_arr = arr.filter(function(val){ return val.member == row.member && val.year == row.year; });
+	var arr_to_current = relevant_arr.slice(0,relevant_arr.indexOf(row)+1);
+	var avg = arr_to_current.reduce(function(total, val){return total + parseInt(val.rank); }, 0) / arr_to_current.length;
+	return {year: row.year, month: row.month, member: row.member, avg: avg};
+}
+
+function compute_alltime_average(row, idx, arr) {
+	var relevant_arr = arr.filter(function(val){ return val.member == row.member; });
+	var arr_to_current = relevant_arr.slice(0,relevant_arr.indexOf(row)+1);
+	var avg = arr_to_current.reduce(function(total, val){return total + parseInt(val.rank); }, 0) / arr_to_current.length;
+	return {year: row.year, month: row.month, member: row.member, avg: avg};
+}
 
 function download_image(gd) {
 	var plot_area_hidden = document.getElementById('div_plotarea_hidden');
-	Plotly.downloadImage(plot_area_hidden, {format: 'png', filename: 'niji_rankings_'+months[ranks[0].length-1]});
+	Plotly.downloadImage(plot_area_hidden, {format: 'png', filename: 'niji_rankings_'+months[num_months-1]});
 }
 
-function draw_plot() {
+function draw_plot(rows) {
 	var plot_area = document.getElementById('div_plotarea');
 	var plot_area_hidden = document.getElementById('div_plotarea_hidden');
 	
 	var data = [];
 	for (var i = 0; i < 9; i++) {
 		var trace = {
-			x: months,
-			y: ranks[i],
+			x: unpack(rows, 'month'),
+			y: unpack(rows, 'rank'),
 			mode: 'lines',
 			type: 'scatter',
 			name: names[i],
+			transforms: [
+				{
+					type: 'filter',
+					target: unpack(rows, 'member'),
+					operation: '=',
+					value: names[i]
+				}
+			],
 			line: {
 				color: colors[i],
 				width: 3
@@ -124,7 +122,6 @@ function draw_plot() {
 			gridcolor: '#505358'
 		},
 		height: 600,
-		//width: (ranks[0].length +  4) * 80,
 		width: 1024,
 		margin: {
 			pad: 5,
@@ -188,7 +185,7 @@ function draw_plot() {
 
 function generate_links() {
 	var curryear;
-	for (var i = ranks[0].length - 1; i >= 0; i--) {
+	for (var i = num_months - 1; i >= 0; i--) {
 		var obj = new Date(months[i]);
 		
 		var year = obj.getFullYear();
@@ -209,7 +206,7 @@ function generate_links() {
 	}
 }
 
-function draw_moving_avg() {
+function draw_moving_avg(rows) {
 	var baselayout = {
 		title: {
 			font: {
@@ -254,17 +251,34 @@ function draw_moving_avg() {
 		displayModeBar: false
 	};
 	
-	for (var i in years) {
-		var data = [];
+	var yearly_avg = rows.map(compute_yearly_average);
+	var alltime_avg = rows.map(compute_alltime_average);
+	
+	var i = 0;
+	for (i in years) {
 		var year = years[i];
-		var avg_months = months.filter( (val, idx, arr) => {return new Date(val).getFullYear() == year;} );
-		for (var memberidx in moving_average) {
+		var data = [];
+		for (var memberidx in names) {
 			var trace = {
-				x: avg_months,
-				y: moving_average[memberidx][year],
+				x: unpack(yearly_avg, 'month'),
+				y: unpack(yearly_avg, 'avg'),
 				mode: 'lines',
 				type: 'scatter',
 				name: names[memberidx],
+				transforms: [
+					{
+						type: 'filter',
+						target: unpack(yearly_avg, 'year'),
+						operation: '=',
+						value: year
+					},
+					{
+						type: 'filter',
+						target: unpack(yearly_avg, 'member'),
+						operation: '=',
+						value: names[memberidx]
+					}
+				],
 				line: {
 					color: colors[memberidx],
 					width: 3
@@ -284,17 +298,85 @@ function draw_moving_avg() {
 		
 		var layout = $.extend({},baselayout);
 		layout.title.text = year;
-		layout.xaxis.range = [avg_months[0],avg_months[avg_months.length-1]];
+		var relevant_arr = unpack(yearly_avg.filter(function(val){ return val.year == year; }), 'month').filter(filter_unique);
+		layout.xaxis.range = [relevant_arr.shift(),year+"-12"];
 		
 		Plotly.newPlot(plot_area.get(0), data, layout, plotoptions);
 	}
 	
+	i++;
 	
+		var data = [];
+		for (var memberidx in names) {
+			var trace = {
+				x: unpack(alltime_avg, 'month'),
+				y: unpack(alltime_avg, 'avg'),
+				mode: 'lines',
+				type: 'scatter',
+				name: names[memberidx],
+				transforms: [
+					{
+						type: 'filter',
+						target: unpack(alltime_avg, 'member'),
+						operation: '=',
+						value: names[memberidx]
+					}
+				],
+				line: {
+					color: colors[memberidx],
+					width: 3
+				}
+			};
+			data.push(trace);
+		}
+	
+	var plot_area = $('<div>',{class:'div_plotarea carousel-item'});
+	var tab = $('<li>',{'data-target':'#carousel-moving-avg','data-slide-to':i});
+	$('#carousel-moving-avg .carousel-inner').append(plot_area);
+	$('#carousel-moving-avg .carousel-indicators').append(tab);
+	
+	var layout = $.extend({},baselayout);
+	layout.title.text = "All Time Average";
+	var relevant_arr = unpack(alltime_avg, 'month').filter(filter_unique);
+	layout.height = 600;
+	layout.margin.b = 50;
+	layout.xaxis.range = [relevant_arr.shift(),relevant_arr.pop()];
+		layout.xaxis.rangeslider = {
+		visible: true,
+		thickness: 0.1
+	};
+	layout.xaxis.rangeselector = {
+		buttons: [
+			{
+				count: 1,
+				step: 'year',
+				stepmode: 'todate',
+				label: 'Current Year'
+			},
+			{
+				count: 6,
+				step: 'month',
+				stepmode: 'backward',
+				label: 'Last 6 months'
+			},
+			{step: 'all'}
+		],
+		bgcolor: '#999'
+	};
+	
+	Plotly.newPlot(plot_area.get(0), data, layout, plotoptions);
+}
+
+function process_csv(rows) {
+	num_months = unpack(rows, 'month').filter(filter_unique).length;
+	
+	plot_width = (num_months +  4) * 60;
+	
+	draw_plot(rows);
+	generate_links();
+	draw_moving_avg(rows);
 }
 
 $(document).ready(function(){
-	
-	draw_plot();
-	generate_links();
-	draw_moving_avg();
+	Plotly.d3.csv("ranks.csv",process_csv);
 });
