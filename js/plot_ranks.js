@@ -230,10 +230,10 @@ function draw_moving_avg(rows) {
 			hoverformat: '.4f'
 		},
 		width: 1024,
-		height: 450,
+		height: 600,
 		margin: {
 			pad: 5,
-			t: 50
+			t: 100
 		},
 		font: {
 			color: '#dcddde',
@@ -288,13 +288,13 @@ function draw_moving_avg(rows) {
 		}
 		
 		var plot_area = $('<div>',{class:'div_plotarea carousel-item'});
-		var tab = $('<li>',{'data-target':'#carousel-moving-avg','data-slide-to':i});
+		var tab = $('<buttonn>',{'type':'button','class':'btn btn-dark btn-avg','data-target':'#carousel-moving-avg','data-slide-to':i,html:year});
 		if (i == years.length - 1) {
 			$(plot_area).addClass('active');
 			$(tab).addClass('active');
 		}
 		$('#carousel-moving-avg .carousel-inner').append(plot_area);
-		$('#carousel-moving-avg .carousel-indicators').append(tab);
+		$('#carousel-moving-avg .btn-group-years').append(tab);
 		
 		var layout = $.extend({},baselayout);
 		layout.title.text = year;
@@ -306,39 +306,38 @@ function draw_moving_avg(rows) {
 	
 	i++;
 	
-		var data = [];
-		for (var memberidx in names) {
-			var trace = {
-				x: unpack(alltime_avg, 'month'),
-				y: unpack(alltime_avg, 'avg'),
-				mode: 'lines',
-				type: 'scatter',
-				name: names[memberidx],
-				transforms: [
-					{
-						type: 'filter',
-						target: unpack(alltime_avg, 'member'),
-						operation: '=',
-						value: names[memberidx]
-					}
-				],
-				line: {
-					color: colors[memberidx],
-					width: 3
+	var data = [];
+	for (var memberidx in names) {
+		var trace = {
+			x: unpack(alltime_avg, 'month'),
+			y: unpack(alltime_avg, 'avg'),
+			mode: 'lines',
+			type: 'scatter',
+			name: names[memberidx],
+			transforms: [
+				{
+					type: 'filter',
+					target: unpack(alltime_avg, 'member'),
+					operation: '=',
+					value: names[memberidx]
 				}
-			};
-			data.push(trace);
-		}
+			],
+			line: {
+				color: colors[memberidx],
+				width: 3
+			}
+		};
+		data.push(trace);
+	}
 	
 	var plot_area = $('<div>',{class:'div_plotarea carousel-item'});
-	var tab = $('<li>',{'data-target':'#carousel-moving-avg','data-slide-to':i});
+	var tab = $('<buttonn>',{'type':'button','class':'btn btn-dark btn-avg','data-target':'#carousel-moving-avg','data-slide-to':i,html:'All Time'});
 	$('#carousel-moving-avg .carousel-inner').append(plot_area);
-	$('#carousel-moving-avg .carousel-indicators').append(tab);
+	$('#carousel-moving-avg .btn-group-all').append(tab);
 	
 	var layout = $.extend({},baselayout);
 	layout.title.text = "All Time Average";
 	var relevant_arr = unpack(alltime_avg, 'month').filter(filter_unique);
-	layout.height = 600;
 	layout.margin.b = 50;
 	layout.xaxis.range = [relevant_arr.shift(),relevant_arr.pop()];
 		layout.xaxis.rangeslider = {
@@ -379,4 +378,9 @@ function process_csv(rows) {
 
 $(document).ready(function(){
 	Plotly.d3.csv("ranks.csv",process_csv);
+	
+	$('#carousel-moving-avg').on('click','.btn-avg',function(){
+		$(this).addClass('active');
+		$('#carousel-moving-avg .btn-avg').not(this).removeClass('active');
+	});
 });

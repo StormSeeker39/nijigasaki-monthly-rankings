@@ -22,7 +22,6 @@
 		<script src="js/plot_ranks.js?v=201903"></script>
 		
 		<style type="text/css">
-			
 		</style>
 	</head>
 	<body class="bg-dark text-light">
@@ -44,12 +43,14 @@
 				<div class="col-9 text-center">
 					<h4 class="text-left">Yearly Cumulative Average</h4>
 					<div id="carousel-moving-avg" class="carousel slide d-inline-block">
-						<div class="carousel-inner" style="height: 600px"></div>
-						<ol class="carousel-indicators"></ol>
+						<div class="btn-toolbar d-inline-block text-center" role="toolbar">
+							<div class="btn-group mr-2 btn-group-years" role="group"></div>
+							<div class="btn-group btn-group-all" role="group"></div>
+						</div>
+						<div class="carousel-inner"></div>
 					</div>
 				</div>
 			</div>
-			<footer style="height: 60px"></footer>
 		</div>
 	</body>
 </html>
