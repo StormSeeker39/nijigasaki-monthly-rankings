@@ -83,7 +83,8 @@ function draw_plot() {
 		title: {
 			text: 'Nijigasaki Monthly Rankings',
 			font: {
-				size: 24
+				size: 24,
+				color: '#f8f9fa'
 			}
 		},
 		xaxis: {
@@ -96,12 +97,12 @@ function draw_plot() {
 			},
 			rangeselector: {
 				buttons: [
-					//{
-					//	count: 1,
-					//	step: 'year',
-					//	stepmode: 'todate',
-					//	label: 'Current Year'
-					//},
+					{
+						count: 1,
+						step: 'year',
+						stepmode: 'todate',
+						label: 'Current Year'
+					},
 					{
 						count: 6,
 						step: 'month',
@@ -210,6 +211,12 @@ function generate_links() {
 
 function draw_moving_avg() {
 	var baselayout = {
+		title: {
+			font: {
+				size: 24,
+				color: '#f8f9fa'
+			}
+		},
 		xaxis: {
 			type: 'date',
 			dtick: 'M1',
@@ -222,12 +229,14 @@ function draw_moving_avg() {
 			autorange: 'reversed',
 			fixranged: true,
 			showgrid: true,
-			gridcolor: '#505358'
+			gridcolor: '#505358',
+			hoverformat: '.4f'
 		},
 		width: 1024,
+		height: 450,
 		margin: {
 			pad: 5,
-			b: 100
+			t: 50
 		},
 		font: {
 			color: '#dcddde',
@@ -235,9 +244,14 @@ function draw_moving_avg() {
 			family: 'Calibri, Arial, sans-serif'
 		},
 		showlegend: true,
-		dragmode: 'pan',
+		dragmode: 'select',
 		paper_bgcolor: $(':root').css('--dark'),
 		plot_bgcolor: $(':root').css('--dark')
+	};
+	
+	var plotoptions = {
+		displaylogo: false,
+		displayModeBar: false
 	};
 	
 	for (var i in years) {
@@ -260,7 +274,7 @@ function draw_moving_avg() {
 		}
 		
 		var plot_area = $('<div>',{class:'div_plotarea carousel-item'});
-		var tab = $('<li>',{'data-target':'#carousel-moving-avg','data-slide-to':i,html:year});
+		var tab = $('<li>',{'data-target':'#carousel-moving-avg','data-slide-to':i});
 		if (i == years.length - 1) {
 			$(plot_area).addClass('active');
 			$(tab).addClass('active');
@@ -269,13 +283,10 @@ function draw_moving_avg() {
 		$('#carousel-moving-avg .carousel-indicators').append(tab);
 		
 		var layout = $.extend({},baselayout);
-		layout.title = {
-			text: year,
-			font: { size: 24 }
-		};
+		layout.title.text = year;
 		layout.xaxis.range = [avg_months[0],avg_months[avg_months.length-1]];
 		
-		Plotly.newPlot(plot_area.get(0), data, layout);
+		Plotly.newPlot(plot_area.get(0), data, layout, plotoptions);
 	}
 	
 	
@@ -285,5 +296,5 @@ $(document).ready(function(){
 	
 	draw_plot();
 	generate_links();
-	//draw_moving_avg();
+	draw_moving_avg();
 });
