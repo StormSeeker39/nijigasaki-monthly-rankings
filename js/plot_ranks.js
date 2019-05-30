@@ -4,6 +4,10 @@ var colors = ['#ffb6c1','#ffff93','#add8e6','#4169e1','#ff7c00','#e2a9f3','#ff00
 //var colors = ['#ED7D95','#E7D600','#01B7ED','#485EC6','#FF5800','#A664A0','#D81C2F','#84C36E','#9CA5B9'];
 //var colors = ['#FFCDD8','#F6E94A','#93E6FF','#8CA0FF','#FF9C68','#D57ECD','#FF6070','#B8FF9F','#CDCDCD'];
 
+var placements = [1,2,3];
+var placement_names = ['1st','2nd','3rd'];
+var placement_colors = ['#fbc852','#bebbbb','#af9697'];
+
 var years = [2017,2018,2019];
 
 var month_names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -209,6 +213,7 @@ function generate_links() {
 function draw_moving_avg(rows) {
 	var baselayout = {
 		title: {
+			text: 'Average',
 			font: {
 				size: 24,
 				color: '#f8f9fa'
@@ -217,7 +222,8 @@ function draw_moving_avg(rows) {
 		xaxis: {
 			type: 'date',
 			dtick: 'M1',
-			hoverformat: '%b %Y'
+			hoverformat: '%b %Y',
+			automargin: true
 		},
 		yaxis: {
 			title: 'Rank',
@@ -229,11 +235,13 @@ function draw_moving_avg(rows) {
 			gridcolor: '#505358',
 			hoverformat: '.4f'
 		},
-		width: 1024,
-		height: 600,
+		width: $('#carousel-moving-avg').css('width').replace('px','') * 2 / 3,
+		height: 450,
+//		autosize: true,
 		margin: {
 			pad: 5,
-			t: 100
+			t: 100,
+			r: 25
 		},
 		font: {
 			color: '#dcddde',
@@ -241,6 +249,10 @@ function draw_moving_avg(rows) {
 			family: 'Calibri, Arial, sans-serif'
 		},
 		showlegend: true,
+		legend: {
+			orientation: 'h',
+			y: -0.30
+		},
 		dragmode: 'select',
 		paper_bgcolor: $(':root').css('--dark'),
 		plot_bgcolor: $(':root').css('--dark')
@@ -287,21 +299,31 @@ function draw_moving_avg(rows) {
 			data.push(trace);
 		}
 		
-		var plot_area = $('<div>',{class:'div_plotarea carousel-item'});
+//		var plot_area = $('<div>',{class:'div_plotarea carousel-item'});
+		var item = $('<div>',{class:'carousel-item','data-year':year});
+
+		var row = $('<div>',{class:'row'});
+
+		var plot_area = $('<div>',{class:'div_plotarea col-8', style: 'overflow-x: hidden'});
+		var top3 = $('<div>',{class:'div_plotarea top3 col-4'});
 		var tab = $('<buttonn>',{'type':'button','class':'btn btn-dark btn-avg','data-target':'#carousel-moving-avg','data-slide-to':i,html:year});
 		if (i == years.length - 1) {
-			$(plot_area).addClass('active');
+			$(item).addClass('active');
 			$(tab).addClass('active');
 		}
-		$('#carousel-moving-avg .carousel-inner').append(plot_area);
+		row.append(plot_area);
+		row.append(top3);
+		item.append(row);
+		$('#carousel-moving-avg .carousel-inner').append(item);
 		$('#carousel-moving-avg .btn-group-years').append(tab);
 		
-		var layout = $.extend({},baselayout);
-		layout.title.text = year;
+		var layout = $.extend(true,{},baselayout);
 		var relevant_arr = unpack(yearly_avg.filter(function(val){ return val.year == year; }), 'month').filter(filter_unique);
 		layout.xaxis.range = [relevant_arr.shift(),year+"-12"];
 		
-		Plotly.newPlot(plot_area.get(0), data, layout, plotoptions);
+		var options = $.extend(true, {}, plotoptions);
+		
+		Plotly.newPlot(plot_area.get(0), data, layout, options);
 	}
 	
 	i++;
@@ -329,21 +351,24 @@ function draw_moving_avg(rows) {
 		};
 		data.push(trace);
 	}
+
+	var item = $('<div>',{class:'carousel-item','data-year':'all'});
 	
-	var plot_area = $('<div>',{class:'div_plotarea carousel-item'});
+	var row = $('<div>',{class:'row'});
+	
+	var plot_area = $('<div>',{class:'div_plotarea col-8', style: 'overflow-x: hidden'});
+	var top3 = $('<div>',{class:'div_plotarea top3 col-4'});
 	var tab = $('<buttonn>',{'type':'button','class':'btn btn-dark btn-avg','data-target':'#carousel-moving-avg','data-slide-to':i,html:'All Time'});
-	$('#carousel-moving-avg .carousel-inner').append(plot_area);
+	row.append(plot_area);
+	row.append(top3);
+	item.append(row);
+	$('#carousel-moving-avg .carousel-inner').append(item);
 	$('#carousel-moving-avg .btn-group-all').append(tab);
 	
-	var layout = $.extend({},baselayout);
-	layout.title.text = "All Time Average";
+	var layout = $.extend(true, {},baselayout);
 	var relevant_arr = unpack(alltime_avg, 'month').filter(filter_unique);
 	layout.margin.b = 50;
 	layout.xaxis.range = [relevant_arr.shift(),relevant_arr.pop()];
-		layout.xaxis.rangeslider = {
-		visible: true,
-		thickness: 0.1
-	};
 	layout.xaxis.rangeselector = {
 		buttons: [
 			{
@@ -363,6 +388,85 @@ function draw_moving_avg(rows) {
 		bgcolor: '#999'
 	};
 	
+	var options = $.extend(true, {}, plotoptions);
+	Plotly.newPlot(plot_area.get(0), data, layout, options);
+}
+
+function draw_top_finishes(rows, year) {
+	var data = [];
+	
+	for (var i in placements) {
+		var rank = placements[i];
+
+		var finishes = rows.filter(function(val){return val.rank == rank && (year == 'all' || val.year == year); });
+		
+		var trace = {
+			x: names.map(function(name){ return finishes.filter(function(val){return val.member == name;}).length; }),
+			y: names,
+			text: names.map(function(name){ return finishes.filter(function(val){return val.member == name;}).length; }).map(String),
+			textposition: 'auto',
+			textfont: {
+				family: 'Calibri, Arial, sans-serif',
+				size: 12
+			},
+			hoverinfo: 'none',
+			name: placement_names[i],
+			type: 'bar',
+			orientation: 'h',
+			marker: {
+				color: placement_colors[i],
+				width: 1
+			}
+		};
+		
+		data.push(trace);
+	}
+	
+	var layout = {
+		title: {
+			text: 'Top 3 Finishes',
+			font: {
+				size: 24,
+				color: '#f8f9fa'
+			}
+		},
+		barmode: 'stack',
+		xaxis: {
+			gridcolor: '#505358'
+		},
+		yaxis: {
+			autorange: 'reversed'
+		},
+		height: 450,
+		width: 375,
+		margin: {
+			l: 50,
+			r: 50,
+			pad: 5
+		},
+		font: {
+			color: '#dcddde',
+			size: 14,
+			family: 'Calibri, Arial, sans-serif'
+		},
+		showlegend: true,
+		legend: {
+			traceorder: 'normal',
+			orientation: 'h',
+			x: 0,
+			y: -0.15
+		},
+		paper_bgcolor: $(':root').css('--dark'),
+		plot_bgcolor: $(':root').css('--dark')
+	};
+	
+	var plotoptions = {
+		displaylogo: false,
+		displayModeBar: false
+	};
+	
+	var plot_area = $('div[data-year='+year+'] div.top3');
+	
 	Plotly.newPlot(plot_area.get(0), data, layout, plotoptions);
 }
 
@@ -374,6 +478,10 @@ function process_csv(rows) {
 	draw_plot(rows);
 	generate_links();
 	draw_moving_avg(rows);
+	for (var i in years) {
+		draw_top_finishes(rows, years[i]);
+	}
+	draw_top_finishes(rows, 'all');
 }
 
 $(document).ready(function(){

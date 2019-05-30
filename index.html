@@ -8,7 +8,7 @@
 		<meta http-equiv="Cache-Control" content="no-cache" />
 		
 		<meta property="og:title" content="Nijigasaki Monthly Rankings"/>
-		<meta property="og:type" content="website"/>
+		<meta property="og:type" content="article"/>
 		<meta property="og:url" content="https://stormseeker39.github.io/nijigasaki-monthly-rankings/"/>
 		<meta property="og:image" content="https://stormseeker39.github.io/nijigasaki-monthly-rankings/niji_rankings_2019-04.png"/>
 		<meta property="og:site_name" content="Nijigasaki Monthly Rankings"/>
@@ -19,7 +19,7 @@
 		<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" crossorigin="anonymous"></script>
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" crossorigin="anonymous"></script>
 		<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" crossorigin="anonymous"></script>
-		<script src="js/plot_ranks.js?v=201903"></script>
+		<script src="js/plot_ranks.js?v=201904"></script>
 		
 		<style type="text/css">
 		</style>
@@ -41,14 +41,19 @@
 			</div>
 			<div class="row justify-content-center mb-5">
 				<div class="col-9 text-center">
-					<h4 class="text-left">Yearly Cumulative Average</h4>
-					<div id="carousel-moving-avg" class="carousel slide d-inline-block">
+					<h4 class="text-left mb-3">Yearly Cumulative Average and Top 3 Finishes</h4>
+					<div id="carousel-moving-avg" class="carousel slide d-inline-block" style="width: 100%">
 						<div class="btn-toolbar d-inline-block text-center" role="toolbar">
 							<div class="btn-group mr-2 btn-group-years" role="group"></div>
 							<div class="btn-group btn-group-all" role="group"></div>
 						</div>
-						<div class="carousel-inner"></div>
+						<div class="carousel-inner col"></div>
 					</div>
+				</div>
+			</div>
+			<div class="row justify-content-center mb-5">
+				<div class="col-9 text-center">
+					<div id="div-top3" class="d-inline-block"></div>
 				</div>
 			</div>
 		</div>
