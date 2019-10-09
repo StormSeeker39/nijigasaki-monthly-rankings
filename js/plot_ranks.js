@@ -125,8 +125,8 @@ function draw_plot(rows) {
 			showgrid: true,
 			gridcolor: '#505358'
 		},
-		height: 600,
-		width: 1024,
+//		height: 600,
+//		width: 1024,
 		margin: {
 			pad: 5,
 			b: 100
@@ -162,6 +162,7 @@ function draw_plot(rows) {
 	
 	var plotoptions = {
 		displaylogo: false,
+		responsive: true,
 		modeBarButtonsToAdd: [
 			{
 				name: 'customimg',
@@ -179,6 +180,7 @@ function draw_plot(rows) {
 	layout_hidden.xaxis.rangeslider.visible = false;
 	layout_hidden.xaxis.rangeselector.visible = false;
 	layout_hidden.legend.y = -0.1;
+	layout_hidden.height = 600;
 	layout_hidden.width = plot_width;
 	delete(layout_hidden.annotations);
 		
@@ -235,9 +237,9 @@ function draw_moving_avg(rows) {
 			gridcolor: '#505358',
 			hoverformat: '.4f'
 		},
-		width: $('#carousel-moving-avg').css('width').replace('px','') * 2 / 3,
-		height: 450,
-//		autosize: true,
+//		width: $('#carousel-moving-avg').css('width').replace('px','') * 2 / 3,
+//		height: 450,
+		autosize: true,
 		margin: {
 			pad: 5,
 			t: 100,
@@ -251,7 +253,7 @@ function draw_moving_avg(rows) {
 		showlegend: true,
 		legend: {
 			orientation: 'h',
-			y: -0.30
+			y: -0.3
 		},
 		dragmode: 'select',
 		paper_bgcolor: $(':root').css('--dark'),
@@ -259,6 +261,7 @@ function draw_moving_avg(rows) {
 	};
 	
 	var plotoptions = {
+		responsive: true,
 		displaylogo: false,
 		displayModeBar: false
 	};
@@ -304,15 +307,19 @@ function draw_moving_avg(rows) {
 
 		var row = $('<div>',{class:'row'});
 
-		var plot_area = $('<div>',{class:'div_plotarea col-8', style: 'overflow-x: hidden'});
-		var top3 = $('<div>',{class:'div_plotarea top3 col-4'});
-		var tab = $('<buttonn>',{'type':'button','class':'btn btn-dark btn-avg','data-target':'#carousel-moving-avg','data-slide-to':i,html:year});
-		if (i == years.length - 1) {
+		var left_pane = $('<div>',{class:'col-8', style: 'overflow-x: hidden'});
+		var right_pane = $('<div>',{class:'col-4'});
+		var plot_area = $('<div>',{class:'div_plotarea_avg'})
+		var top3 = $('<div>',{class:'div_plotarea top3'})
+		var tab = $('<buttonn>',{'type':'button','class':'btn btn-dark btn-avg','data-target':'#carousel-moving-avg','data-year':year,'data-slide-to':i,html:year});
+//		if (i == years.length - 1) {
 			$(item).addClass('active');
 			$(tab).addClass('active');
-		}
-		row.append(plot_area);
-		row.append(top3);
+//		}
+		left_pane.append(plot_area);
+		right_pane.append(top3);
+		row.append(left_pane);
+		row.append(right_pane);
 		item.append(row);
 		$('#carousel-moving-avg .carousel-inner').append(item);
 		$('#carousel-moving-avg .btn-group-years').append(tab);
@@ -324,6 +331,11 @@ function draw_moving_avg(rows) {
 		var options = $.extend(true, {}, plotoptions);
 		
 		Plotly.newPlot(plot_area.get(0), data, layout, options);
+		
+		if (i != years.length - 1) {
+			$(item).removeClass('active');
+			$(tab).removeClass('active');
+		}
 	}
 	
 	i++;
@@ -356,11 +368,17 @@ function draw_moving_avg(rows) {
 	
 	var row = $('<div>',{class:'row'});
 	
-	var plot_area = $('<div>',{class:'div_plotarea col-8', style: 'overflow-x: hidden'});
-	var top3 = $('<div>',{class:'div_plotarea top3 col-4'});
-	var tab = $('<buttonn>',{'type':'button','class':'btn btn-dark btn-avg','data-target':'#carousel-moving-avg','data-slide-to':i,html:'All Time'});
-	row.append(plot_area);
-	row.append(top3);
+	var left_pane = $('<div>',{class:'col-8', style: 'overflow-x: hidden'});
+	var right_pane = $('<div>',{class:'col-4'});
+	var plot_area = $('<div>',{class:'div_plotarea_avg'})
+	var top3 = $('<div>',{class:'div_plotarea top3'})
+	var tab = $('<buttonn>',{'type':'button','class':'btn btn-dark btn-avg','data-target':'#carousel-moving-avg','data-slide-to':i,'data-year':'all',html:'All Time'});
+	$(item).addClass('active');
+	$(tab).addClass('active');
+	left_pane.append(plot_area);
+	right_pane.append(top3);
+	row.append(left_pane);
+	row.append(right_pane);
 	item.append(row);
 	$('#carousel-moving-avg .carousel-inner').append(item);
 	$('#carousel-moving-avg .btn-group-all').append(tab);
@@ -390,6 +408,9 @@ function draw_moving_avg(rows) {
 	
 	var options = $.extend(true, {}, plotoptions);
 	Plotly.newPlot(plot_area.get(0), data, layout, options);
+	
+	$(item).removeClass('active');
+	$(tab).removeClass('active');
 }
 
 function draw_top_finishes(rows, year) {
@@ -490,5 +511,11 @@ $(document).ready(function(){
 	$('#carousel-moving-avg').on('click','.btn-avg',function(){
 		$(this).addClass('active');
 		$('#carousel-moving-avg .btn-avg').not(this).removeClass('active');
+	});
+	
+	$('#carousel-moving-avg').on('slid.bs.carousel',function(e){
+		var slidenum = $(e.relatedTarget).attr('data-year');
+		var target_plot = $('div[data-year='+slidenum+'] .div_plotarea_avg').get(0);
+		Plotly.Plots.resize(target_plot);
 	});
 });
